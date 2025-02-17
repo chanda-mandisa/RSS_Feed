@@ -18,16 +18,16 @@ git clone https://github.com/chanda-mandisa/RSS_Feed.git
 cd rss-feed
 ```
 
+## System Requirements
+- **Python 3.x**
+- A modern web browser (Chrome, Firefox, Edge, etc.)
+  
 ### Running the Script
 1. Generate a new RSS feed:
    ```sh
    python generate_rss_feed.py
    ```
 2. A new file, **aggregated_feed_YYYYMMDD_HHMMSS.xml**, will be created in the directory.
-
-## System Requirements
-- **Python 3.x**
-- A modern web browser (Chrome, Firefox, Edge, etc.)
 
 ## Usage
 ### Viewing the RSS Feed
