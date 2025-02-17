@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> <!-- Ensures proper character encoding for different languages -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Makes the page responsive on mobile devices -->
+    <title>Private News Feed</title> <!-- Title displayed in the browser tab -->
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap'); 
+        /* Custom Google Font import */
+
+        /* General page styling */
+        body {
+            font-family: 'Baloo 2', cursive; /* Set default font */
+            margin: 0;
+            padding: 0;
+            background: url('background.png') no-repeat center center fixed; /* Background image */
+            background-size: cover; /* Ensures image covers full screen */
+            background-color: #2e2e2e; /* Fallback color */
+            color: #ffffff; /* Default text color */
+        }
+
+        /* Page title styling */
+        h1 {
+            color: #ffffff; /* White title text */
+            text-align: center; /* Center-align title */
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 2.5em; /* Adjust title size */
+        }
+
+        /* Container for RSS feed display */
+        .feed {
+            max-width: 800px; /* Limit content width */
+            margin: 20px auto; /* Center content */
+            padding: 20px; /* Add spacing */
+            background: rgba(0, 0, 0, 0.9); /* Semi-transparent background */
+            border-radius: 8px; /* Rounded edges */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for better visual effect */
+            display: none; /* Initially hidden until content is loaded */
+        }
+
+        /* Individual feed item styling */
+        .item {
+            margin-bottom: 20px; /* Space between items */
+            padding-bottom: 10px; /* Padding below each item */
+            border-bottom: 1px solid #444; /* Subtle separator */
+        }
+
+        .item h2 {
+            font-size: 1.5em; /* Larger title text */
+            color: #ffffff; /* White text */
+        }
+
+        /* Hyperlink styling for feed items */
+        .item h2 a {
+            text-decoration: none; /* Remove default underline */
+            color: #ffffff; /* White color for readability */
+        }
+
+        .item h2 a:hover {
+            text-decoration: underline; /* Underline when hovered */
+            color: #cccccc; /* Slightly dimmed color */
+        }
+
+        /* Description text styling */
+        .item .description {
+            margin: 10px 0; /* Spacing around text */
+            color: #cccccc; /* Lighter gray text */
+        }
+
+        /* Meta information (date, author) styling */
+        .item .meta {
+            font-size: 0.9em; /* Slightly smaller font */
+            color: #aaaaaa; /* Light gray text */
+        }
+
+        /* File input section styling */
+        .file-input {
+            margin: 20px auto; /* Center-align */
+            text-align: center;
+        }
+
+        .file-input input {
+            padding: 10px; /* Larger click area */
+            font-size: 1em;
+            background: #444; /* Dark gray input background */
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 5px; /* Rounded edges */
+        }
+
+        .file-input input:hover {
+            background: #555; /* Lighter gray on hover */
+            border-color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>Private News Feed</h1> <!-- Main heading -->
+
+    <!-- File input for selecting an RSS feed XML file -->
+    <div class="file-input">
+        <label for="rssFileInput">Load a New RSS Feed: </label>
+        <input type="file" id="rssFileInput" accept=".xml"> <!-- Only allows .xml files -->
+    </div>
+
+    <!-- Display container for parsed RSS feed items -->
+    <div class="feed" id="feed"></div>
+
+    <script>
+        const rssFileInput = document.getElementById("rssFileInput"); // Reference to file input
+        const feedContainer = document.getElementById("feed"); // Reference to feed container
+
+        // Function to truncate long descriptions
+        function truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+        }
+
+        // Function to process and display the RSS feed
+        function displayRSS(xml) {
+            const items = xml.getElementsByTagName("item"); // Get all items from XML
+            if (items.length === 0) {
+                feedContainer.style.display = "none"; // Hide if no items found
+                return;
+            }
+
+            feedContainer.style.display = "block"; // Make container visible
+            feedContainer.innerHTML = ""; // Clear existing content
+
+            // Loop through each RSS item and add it to the page
+            for (let i = 0; i < items.length; i++) {
+                const title = items[i].getElementsByTagName("title")[0]?.textContent || "No Title";
+                const link = items[i].getElementsByTagName("link")[0]?.textContent || "#";
+                const description = items[i].getElementsByTagName("description")[0]?.textContent || "No Description";
+                const pubDate = items[i].getElementsByTagName("pubDate")[0]?.textContent || "No Date";
+                const author = items[i].getElementsByTagName("author")[0]?.textContent || "Unknown Author";
+
+                // Truncate long descriptions
+                const truncatedDescription = truncateText(description, 300);
+
+                // Construct the HTML structure for each item
+                const itemHTML = `
+                    <div class="item">
+                        <h2><a href="${link}" target="_blank">${title}</a></h2>
+                        <p class="description">${truncatedDescription}</p>
+                        <p class="meta">Published on: ${pubDate} | Author: ${author}</p>
+                    </div>
+                `;
+                feedContainer.innerHTML += itemHTML; // Append item to the container
+            }
+        }
+
+        // Event listener for handling file input changes
+        rssFileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0]; // Get the selected file
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(e.target.result, "application/xml"); // Convert text to XML
+                    displayRSS(xml); // Process and display the feed
+                };
+                reader.readAsText(file); // Read file as text
+            } else {
+                feedContainer.style.display = "none"; // Hide container if no file is selected
+            }
+        });
+    </script>
+</body>
+</html>
